@@ -28,7 +28,7 @@ This repository contains the source code for the rAAVE smart contracts
 
 ## Building, Deploying and Testing
 
-configuring the repository:
+Configuring the repository:
 
     $ npm i
 
@@ -48,3 +48,4 @@ Running the stress test:
 
     $ ./scripts/start-mainnet-fork.sh & npm run stress-test
 
+_(Standard installation of Node 10.22.1 on Ubuntu 20.04.)_
