@@ -2,7 +2,6 @@ require('dotenv').config();
 const HDWalletProvider = require('@truffle/hdwallet-provider');
 const privateKey = process.env['PRIVATE_KEY'];
 const infuraProjectId = process.env['INFURA_PROJECT_ID'];
-const testServer = process.env['TEST_SERVER'];
 
 module.exports = {
   compilers: {
@@ -48,13 +47,6 @@ module.exports = {
       network_id: 1,
       gas: 10000000,
       host: 'localhost',
-      port: 8545,
-      skipDryRun: true,
-    },
-    testing: {
-      network_id: 1,
-      gas: 10000000,
-      host: testServer,
       port: 8545,
       skipDryRun: true,
     },

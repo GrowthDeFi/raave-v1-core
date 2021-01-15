@@ -25,4 +25,4 @@ jobs:
       env:
         PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
         INFURA_PROJECT_ID: ${{ secrets.INFURA_PROJECT_ID }}
-    - run: ./start-mainnet-fork.sh & npm test
+    - run: ./scripts/start-mainnet-fork.sh & npm test
