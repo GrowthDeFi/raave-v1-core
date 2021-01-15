@@ -31,9 +31,10 @@ contract GLPMiningToken is ERC20, Ownable, ReentrancyGuard//, GToken, GStaking
 	uint256 lastTotalSupply = 1;
 	uint256 lastTotalReserve = 1;
 
-	constructor (string memory _name, string memory _symbol, uint8 _decimals, address _reserveToken, address _rewardsToken, address _treasury)
+	constructor (string memory _name, string memory _symbol, uint8 _decimals, address _reserveToken, address _rewardsToken)
 		ERC20(_name, _symbol) public
 	{
+		address _treasury = msg.sender;
 		_setupDecimals(_decimals);
 		assert(_reserveToken != _rewardsToken);
 		reserveToken = _reserveToken;
