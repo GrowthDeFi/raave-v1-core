@@ -8,30 +8,30 @@ const Pair = artifacts.require('Pair');
 const stkAAVE_rAAVE = artifacts.require('stkAAVE_rAAVE');
 
 module.exports = async (deployer, network, [account]) => {
-  // publish helpers
-  await deployer.deploy(GUniswapV2Exchange);
-
   // publish dependencies
   await deployer.deploy(GElasticTokenManager);
   await deployer.deploy(GPriceOracle);
 
   // publish contract
+  const supply = ['mainnet', 'development'].includes(network) ? `${200e18}` : `${1e18}`;
   deployer.link(GElasticTokenManager, rAAVE);
   deployer.link(GPriceOracle, rAAVE);
-  await deployer.deploy(rAAVE);
+  await deployer.deploy(rAAVE, supply);
   const raave = await rAAVE.deployed();
 
   // mint reference token
-  const exchange = await GUniswapV2Exchange.deployed();
   const aave = await IERC20.at(await raave.referenceToken());
-  const supply = await raave.balanceOf(account);
-  let minted = await aave.balanceOf(account);
-  while (BigInt(minted) < BigInt(supply)) {
-    let amount = String(BigInt(supply) - BigInt(minted));
-    if (BigInt(amount) > BigInt(`${50e18}`)) amount = `${50e18}`;
-    const value = `${10e18}`;
-    await exchange.faucet(aave.address, amount, { value });
-    minted = await aave.balanceOf(account);
+  if (!['mainnet'].includes(network)) {
+    await deployer.deploy(GUniswapV2Exchange);
+    const exchange = await GUniswapV2Exchange.deployed();
+    let minted = await aave.balanceOf(account);
+    while (BigInt(minted) < BigInt(supply)) {
+      let amount = String(BigInt(supply) - BigInt(minted));
+      if (BigInt(amount) > BigInt(`${50e18}`)) amount = `${50e18}`;
+      const value = ['development'].includes(network) ? `${10e18}` : `${1e18}`;
+      await exchange.faucet(aave.address, amount, { value });
+      minted = await aave.balanceOf(account);
+    }
   }
 
   // create pool

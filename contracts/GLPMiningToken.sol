@@ -36,6 +36,8 @@ contract GLPMiningToken is ERC20, Ownable, ReentrancyGuard//, GToken, GStaking
 	{
 		address _treasury = msg.sender;
 		_setupDecimals(_decimals);
+		assert(_reserveToken != address(0));
+		assert(_rewardsToken != address(0));
 		assert(_reserveToken != _rewardsToken);
 		reserveToken = _reserveToken;
 		rewardsToken = _rewardsToken;

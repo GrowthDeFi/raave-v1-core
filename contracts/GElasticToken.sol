@@ -40,6 +40,7 @@ contract GElasticToken is ElasticERC20, Ownable, ReentrancyGuard, GElastic
 	{
 		address _treasury = msg.sender;
 		_setupDecimals(_decimals);
+		assert(_referenceToken != address(0));
 		referenceToken = _referenceToken;
 		etm.init(_treasury);
 		oracle.init();

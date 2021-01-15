@@ -12,10 +12,8 @@ import { $ } from "./network/$.sol";
  */
 contract rAAVE is GElasticToken
 {
-	uint256 constant INITIAL_SUPPLY = 200e18;
-
-	constructor ()
-		GElasticToken("rebase AAVE", "rAAVE", 18, $.AAVE, INITIAL_SUPPLY) public
+	constructor (uint256 _initialSupply)
+		GElasticToken("rebase AAVE", "rAAVE", 18, $.AAVE, _initialSupply) public
 	{
 	}
 }
