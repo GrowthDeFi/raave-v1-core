@@ -10,8 +10,8 @@
   "devDependencies": {
     "@openzeppelin/contracts": "3.3.0",
     "@truffle/hdwallet-provider": "^1.2.1",
-    "@uniswap/lib": "^4.0.1-alpha",
-    "@uniswap/v2-periphery": "^1.1.0-beta.0",
+    "@uniswap/lib": "4.0.1-alpha",
+    "@uniswap/v2-periphery": "1.1.0-beta.0",
     "axios": "^0.21.1",
     "dotenv": "^8.2.0",
     "ganache-cli": "^6.12.2",
@@ -28,7 +28,7 @@
     "deploy:rinkeby": "truffle migrate --network rinkeby",
     "deploy:kovan": "truffle migrate --network kovan",
     "deploy:goerli": "truffle migrate --network goerli",
-    "source": "truffle-flattener contracts/GTokens.sol | sed '/^.*SPDX-License-Identifier:.*$/d' | sed '/^pragma experimental ABIEncoderV2;$/d' | sed '1s/^/\\/\\/ SPDX-License-Identifier: GPL-3.0-only\\npragma experimental ABIEncoderV2;\\n\\n/' > GrowthDeFi.sol",
+    "source": "truffle-flattener contracts/GTokens.sol | sed '/^.*SPDX-License-Identifier:.*$/d' | sed '1s/^/\\/\\/ SPDX-License-Identifier: GPL-3.0-only\\n\\n/' > rAAVE.sol",
     "test": "truffle test",
     "stress-test": "npm run deploy && node stress-test/index.js"
   },
