@@ -2,6 +2,7 @@
 pragma solidity ^0.6.0;
 
 import { SafeMath } from "@openzeppelin/contracts/math/SafeMath.sol";
+import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 import { Math } from "./Math.sol";
 import { Transfers } from "./Transfers.sol";
@@ -13,6 +14,49 @@ import { $ } from "../network/$.sol";
 library UniswapV2LiquidityPoolAbstraction
 {
 	using SafeMath for uint256;
+
+	function _estimateJoinPool(address _pair, address _token, uint256 _amount) internal view returns (uint256 _shares)
+	{
+		if (_amount == 0) return 0;
+		address _router = $.UniswapV2_ROUTER02;
+		address _token0 = Pair(_pair).token0();
+
+		(uint256 _reserve0, uint256 _reserve1,) = Pair(_pair).getReserves();
+		uint256 _balance = _token == _token0 ? _reserve0 : _reserve1;
+		uint256 _otherBalance = _token == _token0 ? _reserve1 : _reserve0;
+
+		uint256 _totalSupply = IERC20(_pair).totalSupply();
+
+		uint256 _swapAmount = _calcSwapOutputFromInput(_balance, _amount);
+		if (_swapAmount == 0) _swapAmount = _amount.div(2);
+		uint256 _leftAmount = _amount.sub(_swapAmount);
+
+		uint256 _additionalAmount = Router02(_router).getAmountOut(_swapAmount, _balance, _otherBalance);
+
+		_shares = Math._min(_totalSupply.mul(_leftAmount) / _balance.add(_swapAmount), _totalSupply.mul(_additionalAmount) / _otherBalance.sub(_additionalAmount));
+		return _shares;
+	}
+
+	function _estimateExitPool(address _pair, address _token, uint256 _shares) internal view returns (uint256 _amount)
+	{
+		if (_shares == 0) return 0;
+		address _router = $.UniswapV2_ROUTER02;
+		address _token0 = Pair(_pair).token0();
+
+		(uint256 _reserve0, uint256 _reserve1,) = Pair(_pair).getReserves();
+		uint256 _balance = _token == _token0 ? _reserve0 : _reserve1;
+		uint256 _otherBalance = _token == _token0 ? _reserve1 : _reserve0;
+
+		uint256 _totalSupply = IERC20(_pair).totalSupply();
+
+		uint256 _baseAmount = _balance.mul(_shares) / _totalSupply;
+		uint256 _swapAmount = _otherBalance.mul(_shares) / _totalSupply;
+
+		uint256 _additionalAmount = Router02(_router).getAmountOut(_swapAmount, _otherBalance.sub(_swapAmount), _balance.sub(_baseAmount));
+
+		_amount = _baseAmount.add(_additionalAmount);
+		return _amount;
+	}
 
 	function _joinPool(address _pair, address _token, uint256 _amount, uint256 _minShares) internal returns (uint256 _shares)
 	{

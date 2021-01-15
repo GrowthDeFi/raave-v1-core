@@ -62,15 +62,17 @@ contract GLPMiningToken is ERC20, Ownable, ReentrancyGuard//, GToken, GStaking
 
 	function calcSharesFromTokenAmount(address _token, uint256 _amount) public view /*override*/ returns (uint256 _shares)
 	{
-		return 0; // TODO
+		uint256 _cost = UniswapV2LiquidityPoolAbstraction._estimateJoinPool(reserveToken, _token, _amount);
+		return calcSharesFromCost(_cost);
 	}
 
 	function calcTokenAmountFromShares(address _token, uint256 _shares) public view /*override*/ returns (uint256 _amount)
 	{
-		return 0; // TODO
+		uint256 _cost = calcCostFromShares(_shares);
+		return UniswapV2LiquidityPoolAbstraction._estimateExitPool(reserveToken, _token, _cost);
 	}
 
-	function totalReserve() public view /*virtual override*/ returns (uint256 _totalReserve)
+	function totalReserve() public view /*override*/ returns (uint256 _totalReserve)
 	{
 		return Transfers._getBalance(reserveToken);
 	}
