@@ -50,4 +50,9 @@ module.exports = async (deployer, network, [account]) => {
   await deployer.deploy(stkAAVE_rAAVE, pair.address, raave.address);  
   const stkaave_raave = await stkAAVE_rAAVE.deployed();
   await pair.transfer(stkaave_raave.address, `${1}`);
+
+  // stake LP shares
+  const shares = await pair.balanceOf(account);
+  await pair.approve(stkaave_raave.address, shares);
+  await stkaave_raave.deposit(shares);
 };
