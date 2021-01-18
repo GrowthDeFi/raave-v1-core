@@ -4,6 +4,8 @@ pragma solidity ^0.6.0;
 import { SafeMath } from "@openzeppelin/contracts/math/SafeMath.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
+import { Babylonian } from "@uniswap/lib/contracts/libraries/Babylonian.sol";
+
 import { Math } from "./Math.sol";
 import { Transfers } from "./Transfers.sol";
 
@@ -102,6 +104,6 @@ library UniswapV2LiquidityPoolAbstraction
 
 	function _calcSwapOutputFromInput(uint256 _reserveAmount, uint256 _inputAmount) internal pure returns (uint256)
 	{
-		return Math._sqrt(_reserveAmount.mul(_inputAmount.mul(3988000).add(_reserveAmount.mul(3988009)))).sub(_reserveAmount.mul(1997)) / 1994;
+		return Babylonian.sqrt(_reserveAmount.mul(_inputAmount.mul(3988000).add(_reserveAmount.mul(3988009)))).sub(_reserveAmount.mul(1997)) / 1994;
 	}
 }
