@@ -9,7 +9,7 @@ import { Math } from "./modules/Math.sol";
 import { Transfers } from "./modules/Transfers.sol";
 import { UniswapV2LiquidityPoolAbstraction } from "./modules/UniswapV2LiquidityPoolAbstraction.sol";
 
-contract GLPMiningToken is ERC20, Ownable, ReentrancyGuard//, GToken, GStaking
+contract GLPMiningToken is ERC20, Ownable, ReentrancyGuard
 {
 	uint256 constant BLOCKS_PER_WEEK = 7 days / 15 seconds;
 	uint256 constant DEFAULT_PERFORMANCE_FEE = 10e16; // 10%
@@ -118,10 +118,10 @@ contract GLPMiningToken is ERC20, Ownable, ReentrancyGuard//, GToken, GStaking
 		_burn(_from, _shares);
 	}
 
-	function gulpRewards() external /*override*/ nonReentrant
+	function gulpRewards(uint256 _minCost) external /*override*/ nonReentrant
 	{
 		_updateRewards();
-		UniswapV2LiquidityPoolAbstraction._joinPool(reserveToken, rewardsToken, lastUnlockedReward, 1);
+		UniswapV2LiquidityPoolAbstraction._joinPool(reserveToken, rewardsToken, lastUnlockedReward, _minCost);
 		lastUnlockedReward = 0;
 	}
 
