@@ -83,6 +83,11 @@ contract GLPMiningToken is ERC20, Ownable, ReentrancyGuard
 		return (_lockedReward, _unlockedReward, _rewardPerBlock);
 	}
 
+	function pendingFees() public view /*override*/ returns (uint256 _feeShares)
+	{
+		return _calcFees();
+	}
+
 	function deposit(uint256 _cost) external /*override*/ nonReentrant
 	{
 		address _from = msg.sender;
@@ -127,26 +132,10 @@ contract GLPMiningToken is ERC20, Ownable, ReentrancyGuard
 
 	function gulpFees() external /*override*/ nonReentrant
 	{
-		uint256 _oldTotalSupply = lastTotalSupply;
-		uint256 _oldTotalReserve = lastTotalReserve;
-
-		uint256 _newTotalSupply = totalSupply();
-		uint256 _newTotalReserve = totalReserve();
-
-		// calculates the profit using the following formula
-		// ((P1 - P0) * S1 * f) / P1
-		// where P1 = R1 / S1 and P0 = R0 / S0
-		uint256 _positive = _oldTotalSupply.mul(_newTotalReserve);
-		uint256 _negative = _newTotalSupply.mul(_oldTotalReserve);
-		if (_positive > _negative) {
-			uint256 _profitCost = _positive.sub(_negative).div(_oldTotalSupply);
-			uint256 _feeCost = _profitCost.mul(performanceFee).div(1e18);
-			uint256 _feeShares = calcSharesFromCost(_feeCost);
-			_mint(treasury, _feeShares);
-		}
-
-		lastTotalSupply = _newTotalSupply;
-		lastTotalReserve = _newTotalReserve;
+		uint256 _feeShares = _calcFees();
+		lastTotalSupply = totalSupply();
+		lastTotalReserve = totalReserve();
+		_mint(treasury, _feeShares);
 	}
 
 	function setTreasury(address _treasury) external /*override*/ onlyOwner nonReentrant
@@ -190,6 +179,28 @@ contract GLPMiningToken is ERC20, Ownable, ReentrancyGuard
 			lastLockedReward = lastLockedReward.sub(_removedLockedReward);
 			lastUnlockedReward = _balanceReward.sub(lastLockedReward);
 		}
+	}
+
+	function _calcFees() internal view returns (uint256 _feeShares)
+	{
+		uint256 _oldTotalSupply = lastTotalSupply;
+		uint256 _oldTotalReserve = lastTotalReserve;
+
+		uint256 _newTotalSupply = totalSupply();
+		uint256 _newTotalReserve = totalReserve();
+
+		// calculates the profit using the following formula
+		// ((P1 - P0) * S1 * f) / P1
+		// where P1 = R1 / S1 and P0 = R0 / S0
+		uint256 _positive = _oldTotalSupply.mul(_newTotalReserve);
+		uint256 _negative = _newTotalSupply.mul(_oldTotalReserve);
+		if (_positive > _negative) {
+			uint256 _profitCost = _positive.sub(_negative).div(_oldTotalSupply);
+			uint256 _feeCost = _profitCost.mul(performanceFee).div(1e18);
+			return calcSharesFromCost(_feeCost);
+		}
+
+		return 0;
 	}
 
 	function _calcCurrentRewards() internal view returns (uint256 _currentContractBlock, uint256 _currentRewardPerBlock, uint256 _currentUnlockedReward, uint256 _currentLockedReward)
