@@ -133,9 +133,11 @@ contract GLPMiningToken is ERC20, Ownable, ReentrancyGuard
 	function gulpFees() external /*override*/ nonReentrant
 	{
 		uint256 _feeShares = _calcFees();
-		lastTotalSupply = totalSupply();
-		lastTotalReserve = totalReserve();
-		_mint(treasury, _feeShares);
+		if (_feeShares > 0) {
+			lastTotalSupply = totalSupply();
+			lastTotalReserve = totalReserve();
+			_mint(treasury, _feeShares);
+		}
 	}
 
 	function setTreasury(address _treasury) external /*override*/ onlyOwner nonReentrant
