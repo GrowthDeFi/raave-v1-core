@@ -48,4 +48,4 @@ Running the stress test:
 
     $ ./scripts/start-mainnet-fork.sh & npm run stress-test
 
-_(Standard installation of Node 10.22.1 on Ubuntu 20.04)_
+_(Standard installation of Node 14.15.4 on Ubuntu 20.04)_
