@@ -5,6 +5,10 @@ import { Context } from "@openzeppelin/contracts/GSN/Context.sol";
 import { SafeMath } from "@openzeppelin/contracts/math/SafeMath.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
+/**
+ * @dev This contract is based on the OpenZeppelin ERC20 implementation,
+ * basically adding the elastic extensions.
+ */
 contract ElasticERC20 is Context, IERC20
 {
 	using SafeMath for uint256;

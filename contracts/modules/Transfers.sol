@@ -5,7 +5,8 @@ import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 
 /**
- * @dev This library abstracts ERC-20 operations.
+ * @dev This library abstracts ERC-20 operations in the context of the current
+ * contract.
  */
 library Transfers
 {

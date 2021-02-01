@@ -5,23 +5,30 @@ import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 import { ERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import { ReentrancyGuard } from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
-import { Math } from "./modules/Math.sol";
+import { GLPMining } from "./GLPMining.sol";
+
 import { Transfers } from "./modules/Transfers.sol";
 import { UniswapV2LiquidityPoolAbstraction } from "./modules/UniswapV2LiquidityPoolAbstraction.sol";
 
-contract GLPMiningToken is ERC20, Ownable, ReentrancyGuard
+/**
+ * @notice This contract implements liquidity mining for staking Uniswap V2
+ * shares.
+ */
+contract GLPMiningToken is ERC20, Ownable, ReentrancyGuard, GLPMining
 {
-	uint256 constant BLOCKS_PER_WEEK = 7 days / 15 seconds;
+	uint256 constant MAXIMUM_PERFORMANCE_FEE = 50e16; // 50%
+
+	uint256 constant BLOCKS_PER_WEEK = 7 days / uint256(13 seconds);
 	uint256 constant DEFAULT_PERFORMANCE_FEE = 10e16; // 10%
-	uint256 constant DEFAULT_REWARD_RATE_PER_WEEK = 1e16; // 1%
+	uint256 constant DEFAULT_REWARD_RATE_PER_WEEK = 10e16; // 10%
 
-	address public immutable /*override*/ reserveToken;
-	address public immutable /*override*/ rewardsToken;
+	address public immutable override reserveToken;
+	address public immutable override rewardsToken;
 
-	address public treasury;
+	address public override treasury;
 
-	uint256 public performanceFee = DEFAULT_PERFORMANCE_FEE;
-	uint256 public rewardRatePerWeek = DEFAULT_REWARD_RATE_PER_WEEK;
+	uint256 public override performanceFee = DEFAULT_PERFORMANCE_FEE;
+	uint256 public override rewardRatePerWeek = DEFAULT_REWARD_RATE_PER_WEEK;
 
 	uint256 lastContractBlock = block.number;
 	uint256 lastRewardPerBlock = 0;
@@ -50,45 +57,45 @@ contract GLPMiningToken is ERC20, Ownable, ReentrancyGuard
 		_mint(address(this), 1);
 	}
 
-	function calcSharesFromCost(uint256 _cost) public view /*override*/ returns (uint256 _shares)
+	function calcSharesFromCost(uint256 _cost) public view override returns (uint256 _shares)
 	{
 		return _cost.mul(totalSupply()).div(totalReserve());
 	}
 
-	function calcCostFromShares(uint256 _shares) public view /*override*/ returns (uint256 _cost)
+	function calcCostFromShares(uint256 _shares) public view override returns (uint256 _cost)
 	{
 		return _shares.mul(totalReserve()).div(totalSupply());
 	}
 
-	function calcSharesFromTokenAmount(address _token, uint256 _amount) public view /*override*/ returns (uint256 _shares)
+	function calcSharesFromTokenAmount(address _token, uint256 _amount) external view override returns (uint256 _shares)
 	{
 		uint256 _cost = UniswapV2LiquidityPoolAbstraction._estimateJoinPool(reserveToken, _token, _amount);
 		return calcSharesFromCost(_cost);
 	}
 
-	function calcTokenAmountFromShares(address _token, uint256 _shares) public view /*override*/ returns (uint256 _amount)
+	function calcTokenAmountFromShares(address _token, uint256 _shares) external view override returns (uint256 _amount)
 	{
 		uint256 _cost = calcCostFromShares(_shares);
 		return UniswapV2LiquidityPoolAbstraction._estimateExitPool(reserveToken, _token, _cost);
 	}
 
-	function totalReserve() public view /*override*/ returns (uint256 _totalReserve)
+	function totalReserve() public view override returns (uint256 _totalReserve)
 	{
 		return Transfers._getBalance(reserveToken);
 	}
 
-	function rewardInfo() public view /*override*/ returns (uint256 _lockedReward, uint256 _unlockedReward, uint256 _rewardPerBlock)
+	function rewardInfo() external view override returns (uint256 _lockedReward, uint256 _unlockedReward, uint256 _rewardPerBlock)
 	{
 		(, _rewardPerBlock, _unlockedReward, _lockedReward) = _calcCurrentRewards();
 		return (_lockedReward, _unlockedReward, _rewardPerBlock);
 	}
 
-	function pendingFees() public view /*override*/ returns (uint256 _feeShares)
+	function pendingFees() external view override returns (uint256 _feeShares)
 	{
 		return _calcFees();
 	}
 
-	function deposit(uint256 _cost) external /*override*/ nonReentrant
+	function deposit(uint256 _cost) external override nonReentrant
 	{
 		address _from = msg.sender;
 		uint256 _shares = calcSharesFromCost(_cost);
@@ -96,7 +103,7 @@ contract GLPMiningToken is ERC20, Ownable, ReentrancyGuard
 		_mint(_from, _shares);
 	}
 
-	function withdraw(uint256 _shares) external /*override*/ nonReentrant
+	function withdraw(uint256 _shares) external override nonReentrant
 	{
 		address _from = msg.sender;
 		uint256 _cost = calcCostFromShares(_shares);
@@ -104,17 +111,17 @@ contract GLPMiningToken is ERC20, Ownable, ReentrancyGuard
 		_burn(_from, _shares);
 	}
 
-	function depositToken(address _token, uint256 _amount, uint256 _minShares) external /*override*/ nonReentrant
+	function depositToken(address _token, uint256 _amount, uint256 _minShares) external override nonReentrant
 	{
 		address _from = msg.sender;
-		Transfers._pullFunds(_token, _from, _amount);
 		uint256 _minCost = calcCostFromShares(_minShares);
+		Transfers._pullFunds(_token, _from, _amount);
 		uint256 _cost = UniswapV2LiquidityPoolAbstraction._joinPool(reserveToken, _token, _amount, _minCost);
 		uint256 _shares = _cost.mul(totalSupply()).div(totalReserve().sub(_cost));
 		_mint(_from, _shares);
 	}
 
-	function withdrawToken(address _token, uint256 _shares, uint256 _minAmount) external /*override*/ nonReentrant
+	function withdrawToken(address _token, uint256 _shares, uint256 _minAmount) external override nonReentrant
 	{
 		address _from = msg.sender;
 		uint256 _cost = calcCostFromShares(_shares);
@@ -123,14 +130,14 @@ contract GLPMiningToken is ERC20, Ownable, ReentrancyGuard
 		_burn(_from, _shares);
 	}
 
-	function gulpRewards(uint256 _minCost) external /*override*/ nonReentrant
+	function gulpRewards(uint256 _minCost) external override nonReentrant
 	{
 		_updateRewards();
 		UniswapV2LiquidityPoolAbstraction._joinPool(reserveToken, rewardsToken, lastUnlockedReward, _minCost);
 		lastUnlockedReward = 0;
 	}
 
-	function gulpFees() external /*override*/ nonReentrant
+	function gulpFees() external override nonReentrant
 	{
 		uint256 _feeShares = _calcFees();
 		if (_feeShares > 0) {
@@ -140,22 +147,28 @@ contract GLPMiningToken is ERC20, Ownable, ReentrancyGuard
 		}
 	}
 
-	function setTreasury(address _treasury) external /*override*/ onlyOwner nonReentrant
+	function setTreasury(address _newTreasury) external override onlyOwner nonReentrant
 	{
-		require(_treasury != address(0), "invalid address");
-		treasury = _treasury;
+		require(_newTreasury != address(0), "invalid address");
+		address _oldTreasury = treasury;
+		treasury = _newTreasury;
+		emit ChangeTreasury(_oldTreasury, _newTreasury);
 	}
 
-	function setPerformanceFee(uint256 _performanceFee) external /*override*/ onlyOwner nonReentrant
+	function setPerformanceFee(uint256 _newPerformanceFee) external override onlyOwner nonReentrant
 	{
-		require(_performanceFee <= 1e18, "invalid rate");
-		performanceFee = _performanceFee;
+		require(_newPerformanceFee <= MAXIMUM_PERFORMANCE_FEE, "invalid rate");
+		uint256 _oldPerformanceFee = performanceFee;
+		performanceFee = _newPerformanceFee;
+		emit ChangePerformanceFee(_oldPerformanceFee, _newPerformanceFee);
 	}
 
-	function setRewardRatePerWeek(uint256 _rewardRatePerWeek) external /*override*/ onlyOwner nonReentrant
+	function setRewardRatePerWeek(uint256 _newRewardRatePerWeek) external override onlyOwner nonReentrant
 	{
-		require(_rewardRatePerWeek <= 1e18, "invalid rate");
-		rewardRatePerWeek = _rewardRatePerWeek;
+		require(_newRewardRatePerWeek <= 1e18, "invalid rate");
+		uint256 _oldRewardRatePerWeek = rewardRatePerWeek;
+		rewardRatePerWeek = _newRewardRatePerWeek;
+		emit ChangeRewardRatePerWeek(_oldRewardRatePerWeek, _newRewardRatePerWeek);
 	}
 
 	function _updateRewards() internal

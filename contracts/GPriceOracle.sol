@@ -6,7 +6,10 @@ import { UniswapV2OracleLibrary } from "@uniswap/v2-periphery/contracts/librarie
 
 import { Pair } from "./interop/UniswapV2.sol";
 
-// based on https://github.com/Uniswap/uniswap-v2-periphery/blob/master/contracts/examples/ExampleOracleSimple.sol
+/**
+ * @dev This library implements a TWAP oracle on Uniswap V2. Based on
+ * https://github.com/Uniswap/uniswap-v2-periphery/blob/master/contracts/examples/ExampleOracleSimple.sol
+ */
 library GPriceOracle
 {
 	using FixedPoint for FixedPoint.uq112x112;

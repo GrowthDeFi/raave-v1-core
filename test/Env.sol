@@ -6,7 +6,7 @@ import { SafeMath } from "@openzeppelin/contracts/math/SafeMath.sol";
 import { Transfers } from "../contracts/modules/Transfers.sol";
 
 import { Router02 } from "../contracts/interop/UniswapV2.sol";
-import { WETH as __WETH } from "../contracts/interop/WrappedEther.sol";
+import { WETH } from "../contracts/interop/WrappedEther.sol";
 
 import { $ } from "../contracts/network/$.sol";
 
@@ -28,7 +28,7 @@ contract Env
 		address _router = $.UniswapV2_ROUTER02;
 		address _WETH = Router02(_router).WETH();
 		if (_token == _WETH) {
-			__WETH(_token).deposit{value: _amount}();
+			WETH(_token).deposit{value: _amount}();
 		} else {
 			address[] memory _path = new address[](2);
 			_path[0] = _WETH;

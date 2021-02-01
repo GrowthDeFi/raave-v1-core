@@ -27,7 +27,7 @@ module.exports = async (deployer, network, [account]) => {
     let minted = await aave.balanceOf(account);
     while (BigInt(minted) < BigInt(supply)) {
       let amount = String(BigInt(supply) - BigInt(minted));
-      if (BigInt(amount) > BigInt(`${50e18}`)) amount = `${50e18}`;
+      if (BigInt(amount) > BigInt(`${25e18}`)) amount = `${25e18}`;
       const value = ['development'].includes(network) ? `${10e18}` : `${1e18}`;
       await exchange.faucet(aave.address, amount, { value });
       minted = await aave.balanceOf(account);

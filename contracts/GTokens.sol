@@ -18,6 +18,10 @@ contract rAAVE is GElasticToken
 	}
 }
 
+/**
+ * @notice Definition of stkAAVE/rAAVE. It provides mining or reward rAAVE when
+ * providing liquidity to the AAVE/rAAVE pool.
+ */
 contract stkAAVE_rAAVE is GLPMiningToken
 {
 	constructor (address _AAVE_rAAVE, address _rAAVE)

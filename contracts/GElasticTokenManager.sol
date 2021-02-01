@@ -3,6 +3,9 @@ pragma solidity ^0.6.0;
 
 import { SafeMath } from "@openzeppelin/contracts/math/SafeMath.sol";
 
+/**
+ * @dev This library helps managing rebase parameters and calculations.
+ */
 library GElasticTokenManager
 {
 	using SafeMath for uint256;

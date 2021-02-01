@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity ^0.6.0;
 
+/**
+ * @dev This interface exposes the base functionality of GElasticToken.
+ */
 interface GElastic
 {
 	// view functions
