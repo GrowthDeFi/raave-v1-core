@@ -36,7 +36,7 @@ interface GElastic
 	function removePostRebaseTarget(uint256 _index) external;
 
 	// emitted events
-	event Rebase(uint256 _epoch, uint256 _oldScalingFactor, uint256 _newScalingFactor);
+	event Rebase(uint256 indexed _epoch, uint256 _oldScalingFactor, uint256 _newScalingFactor);
 	event ChangeTreasury(address _oldTreasury, address _newTreasury);
 	event ChangeRebaseMinimumDeviation(uint256 _oldRebaseMinimumDeviation, uint256 _newRebaseMinimumDeviation);
 	event ChangeRebaseDampeningFactor(uint256 _oldRebaseDampeningFactor, uint256 _newRebaseDampeningFactor);

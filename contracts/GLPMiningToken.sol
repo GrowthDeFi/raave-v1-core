@@ -185,10 +185,12 @@ contract GLPMiningToken is ERC20, Ownable, ReentrancyGuard, GLPMining
 		else
 		if (_balanceReward < _totalReward) {
 			uint256 _removedLockedReward = _totalReward.sub(_balanceReward);
+			if (_removedLockedReward >= lastLockedReward) {
+				_removedLockedReward = lastLockedReward;
+			}
 			uint256 _removedRewardPerBlock = _calcRewardPerBlock(_removedLockedReward);
 			if (_removedLockedReward >= lastLockedReward) {
-				_removedRewardPerBlock = lastLockedReward;
-				_removedLockedReward = lastRewardPerBlock;
+				_removedRewardPerBlock = lastRewardPerBlock;
 			}
 			lastRewardPerBlock = lastRewardPerBlock.sub(_removedRewardPerBlock);
 			lastLockedReward = lastLockedReward.sub(_removedLockedReward);
