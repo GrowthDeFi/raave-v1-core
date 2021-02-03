@@ -1,6 +1,8 @@
 const GUniswapV2Exchange = artifacts.require('GUniswapV2Exchange');
 const GElasticTokenManager = artifacts.require('GElasticTokenManager');
 const GPriceOracle = artifacts.require('GPriceOracle');
+const GEtherBridge = artifacts.require('GEtherBridge');
+const GTokenRegistry = artifacts.require('GTokenRegistry');
 const rAAVE = artifacts.require('rAAVE');
 const IERC20 = artifacts.require('IERC20');
 const Factory = artifacts.require('Factory');
@@ -36,21 +38,27 @@ const WETH = {
 	'goerli': '0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6',
 };
 
+const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
+
 module.exports = async (deployer, network, [account]) => {
   // publish dependencies
   await deployer.deploy(GUniswapV2Exchange);
   await deployer.deploy(GElasticTokenManager);
   await deployer.deploy(GPriceOracle);
+  await deployer.deploy(GEtherBridge);
+  await deployer.deploy(GTokenRegistry);
 
   // setup deployment helpers
   const faucet = await GUniswapV2Exchange.deployed();
   const factory = await Factory.at(UniswapV2_FACTORY[network]);
+  const registry = await GTokenRegistry.deployed();
 
   // publish rAAVE contract
   deployer.link(GElasticTokenManager, rAAVE);
   deployer.link(GPriceOracle, rAAVE);
   await deployer.deploy(rAAVE, `${3e18}`);
   const raave = await rAAVE.deployed();
+  await registry.registerNewToken(raave.address, ZERO_ADDRESS);
 
   {
     // mint AAVE
@@ -68,6 +76,7 @@ module.exports = async (deployer, network, [account]) => {
     await deployer.deploy(stkAAVE_rAAVE, pair.address, raave.address);
     const stkaave_raave = await stkAAVE_rAAVE.deployed();
     await pair.transfer(stkaave_raave.address, `${1}`);
+    await registry.registerNewToken(stkaave_raave.address, ZERO_ADDRESS);
 
     // stake LP shares
     const shares = await pair.balanceOf(account);
@@ -91,6 +100,7 @@ module.exports = async (deployer, network, [account]) => {
     await deployer.deploy(stkGRO_rAAVE, pair.address, raave.address);
     const stkgro_raave = await stkGRO_rAAVE.deployed();
     await pair.transfer(stkgro_raave.address, `${1}`);
+    await registry.registerNewToken(stkgro_raave.address, ZERO_ADDRESS);
 
     // stake LP shares
     const shares = await pair.balanceOf(account);
@@ -114,6 +124,7 @@ module.exports = async (deployer, network, [account]) => {
     await deployer.deploy(stkETH_rAAVE, pair.address, raave.address);
     const stketh_raave = await stkETH_rAAVE.deployed();
     await pair.transfer(stketh_raave.address, `${1}`);
+    await registry.registerNewToken(stketh_raave.address, ZERO_ADDRESS);
 
     // stake LP shares
     const shares = await pair.balanceOf(account);
