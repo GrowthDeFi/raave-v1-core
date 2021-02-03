@@ -29,3 +29,27 @@ contract stkAAVE_rAAVE is GLPMiningToken
 	{
 	}
 }
+
+/**
+ * @notice Definition of stkGRO/rAAVE. It provides mining or reward rAAVE when
+ * providing liquidity to the GRO/rAAVE pool.
+ */
+contract stkGRO_rAAVE is GLPMiningToken
+{
+	constructor (address _GRO_rAAVE, address _rAAVE)
+		GLPMiningToken("staked GRO/rAAVE", "stkGRO/rAAVE", 18, _GRO_rAAVE, _rAAVE) public
+	{
+	}
+}
+
+/**
+ * @notice Definition of stkETH/rAAVE. It provides mining or reward rAAVE when
+ * providing liquidity to the WETH/rAAVE pool.
+ */
+contract stkETH_rAAVE is GLPMiningToken
+{
+	constructor (address _ETH_rAAVE, address _rAAVE)
+		GLPMiningToken("staked ETH/rAAVE", "stkETH/rAAVE", 18, _ETH_rAAVE, _rAAVE) public
+	{
+	}
+}
