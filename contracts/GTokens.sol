@@ -55,27 +55,4 @@ contract stkETH_rAAVE is GLPMiningToken
 		GLPMiningToken("staked ETH/rAAVE", "stkETH/rAAVE", 18, _ETH_rAAVE, _rAAVE) public
 	{
 	}
-
-	function depositETH(uint256 _minShares) external payable nonReentrant
-	{
-		address _from = msg.sender;
-		uint256 _amount = msg.value;
-		uint256 _minCost = calcCostFromShares(_minShares);
-		Wrapping._wrap(_amount);
-		uint256 _cost = UniswapV2LiquidityPoolAbstraction._joinPool(reserveToken, $.WETH, _amount, _minCost);
-		uint256 _shares = _cost.mul(totalSupply()).div(totalReserve().sub(_cost));
-		_mint(_from, _shares);
-	}
-
-	function withdrawETH(uint256 _shares, uint256 _minAmount) external nonReentrant
-	{
-		address payable _from = msg.sender;
-		uint256 _cost = calcCostFromShares(_shares);
-		uint256 _amount = UniswapV2LiquidityPoolAbstraction._exitPool(reserveToken, $.WETH, _cost, _minAmount);
-		Wrapping._unwrap(_amount);
-		_from.transfer(_amount);
-		_burn(_from, _shares);
-	}
-
-	receive() external payable {} // not to be used directly
 }
