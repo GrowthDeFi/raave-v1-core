@@ -95,6 +95,7 @@ module.exports = async (deployer, network, [account]) => {
     await gro.transfer(pair.address, `${1e18}`);
     await raave.transfer(pair.address, `${1e18}`);
     await pair.mint(account);
+    await raave.addUniswapV2PostRebaseTarget(pair.address);
 
     // publish staking contract
     await deployer.deploy(stkGRO_rAAVE, pair.address, raave.address);
@@ -119,6 +120,7 @@ module.exports = async (deployer, network, [account]) => {
     await weth.transfer(pair.address, `${1e18}`);
     await raave.transfer(pair.address, `${1e18}`);
     await pair.mint(account);
+    await raave.addUniswapV2PostRebaseTarget(pair.address);
 
     // publish staking contract
     await deployer.deploy(stkETH_rAAVE, pair.address, raave.address);
