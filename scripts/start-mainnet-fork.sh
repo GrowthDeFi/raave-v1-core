@@ -5,6 +5,7 @@ GAS_LIMIT=100000000
 source .env
 
 npx ganache-cli \
+	-q \
 	-h 0.0.0.0 \
 	-i 1 \
 	-l $GAS_LIMIT \

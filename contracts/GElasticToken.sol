@@ -15,6 +15,10 @@ import { Math } from "./modules/Math.sol";
 
 import { Pair } from "./interop/UniswapV2.sol";
 
+/**
+ * @notice This contract implements an ERC20 compatible elastic token that
+ * rebases according to the TWAP of another token. Inspired by AMPL and YAM.
+ */
 contract GElasticToken is ElasticERC20, Ownable, ReentrancyGuard, GElastic
 {
 	using SafeMath for uint256;
@@ -47,67 +51,67 @@ contract GElasticToken is ElasticERC20, Ownable, ReentrancyGuard, GElastic
 		_mint(_treasury, _initialSupply);
 	}
 
-	function treasury() public view override returns (address _treasury)
+	function treasury() external view override returns (address _treasury)
 	{
 		return etm.treasury;
 	}
 
-	function rebaseMinimumDeviation() public view override returns (uint256 _rebaseMinimumDeviation)
+	function rebaseMinimumDeviation() external view override returns (uint256 _rebaseMinimumDeviation)
 	{
 		return etm.rebaseMinimumDeviation;
 	}
 
-	function rebaseDampeningFactor() public view override returns (uint256 _rebaseDampeningFactor)
+	function rebaseDampeningFactor() external view override returns (uint256 _rebaseDampeningFactor)
 	{
 		return etm.rebaseDampeningFactor;
 	}
 
-	function rebaseTreasuryMintPercent() public view override returns (uint256 _rebaseTreasuryMintPercent)
+	function rebaseTreasuryMintPercent() external view override returns (uint256 _rebaseTreasuryMintPercent)
 	{
 		return etm.rebaseTreasuryMintPercent;
 	}
 
-	function rebaseTimingParameters() public view override returns (uint256 _rebaseMinimumInterval, uint256 _rebaseWindowOffset, uint256 _rebaseWindowLength)
+	function rebaseTimingParameters() external view override returns (uint256 _rebaseMinimumInterval, uint256 _rebaseWindowOffset, uint256 _rebaseWindowLength)
 	{
 		return (etm.rebaseMinimumInterval, etm.rebaseWindowOffset, etm.rebaseWindowLength);
 	}
 
-	function rebaseAvailable() public override view returns (bool _rebaseAvailable)
+	function rebaseAvailable() external view override returns (bool _rebaseAvailable)
 	{
 		return etm.rebaseAvailable();
 	}
 
-	function rebaseActive() public override view returns (bool _rebaseActive)
+	function rebaseActive() external view override returns (bool _rebaseActive)
 	{
 		return etm.rebaseActive;
 	}
 
-	function lastRebaseTime() public override view returns (uint256 _lastRebaseTime)
+	function lastRebaseTime() external view override returns (uint256 _lastRebaseTime)
 	{
 		return etm.lastRebaseTime;
 	}
 
-	function epoch() public override view returns (uint256 _epoch)
+	function epoch() external view override returns (uint256 _epoch)
 	{
 		return etm.epoch;
 	}
 
-	function lastExchangeRate() public view override returns (uint256 _exchangeRate)
+	function lastExchangeRate() external view override returns (uint256 _exchangeRate)
 	{
 		return oracle.consultLastPrice(10 ** uint256(decimals()));
 	}
 
-	function currentExchangeRate() public view override returns (uint256 _exchangeRate)
+	function currentExchangeRate() external view override returns (uint256 _exchangeRate)
 	{
 		return oracle.consultCurrentPrice(10 ** uint256(decimals()));
 	}
 
-	function pair() public view override returns (address _pair)
+	function pair() external view override returns (address _pair)
 	{
 		return oracle.pair;
 	}
 
-	function rebase() public override onlyEOA nonReentrant
+	function rebase() external override onlyEOA nonReentrant
 	{
 		oracle.updatePrice();
 
@@ -128,7 +132,7 @@ contract GElasticToken is ElasticERC20, Ownable, ReentrancyGuard, GElastic
 		targets.executeAll();
 	}
 
-	function activateOracle(address _pair) public override onlyOwner nonReentrant
+	function activateOracle(address _pair) external override onlyOwner nonReentrant
 	{
 		address _token0 = Pair(_pair).token0();
 		address _token1 = Pair(_pair).token1();
@@ -136,41 +140,41 @@ contract GElasticToken is ElasticERC20, Ownable, ReentrancyGuard, GElastic
 		oracle.activate(_pair, _token0 == address(this));
 	}
 
-	function activateRebase() public override onlyOwner nonReentrant
+	function activateRebase() external override onlyOwner nonReentrant
 	{
 		require(oracle.active(), "not available");
 		etm.activateRebase();
 	}
 
-	function setTreasury(address _newTreasury) public override onlyOwner nonReentrant
+	function setTreasury(address _newTreasury) external override onlyOwner nonReentrant
 	{
 		address _oldTreasury = etm.treasury;
 		etm.setTreasury(_newTreasury);
 		emit ChangeTreasury(_oldTreasury, _newTreasury);
 	}
 
-	function setRebaseMinimumDeviation(uint256 _newRebaseMinimumDeviation) public override onlyOwner nonReentrant
+	function setRebaseMinimumDeviation(uint256 _newRebaseMinimumDeviation) external override onlyOwner nonReentrant
 	{
 		uint256 _oldRebaseMinimumDeviation = etm.rebaseMinimumDeviation;
 		etm.setRebaseMinimumDeviation(_newRebaseMinimumDeviation);
 		emit ChangeRebaseMinimumDeviation(_oldRebaseMinimumDeviation, _newRebaseMinimumDeviation);
 	}
 
-	function setRebaseDampeningFactor(uint256 _newRebaseDampeningFactor) public override onlyOwner nonReentrant
+	function setRebaseDampeningFactor(uint256 _newRebaseDampeningFactor) external override onlyOwner nonReentrant
 	{
 		uint256 _oldRebaseDampeningFactor = etm.rebaseDampeningFactor;
 		etm.setRebaseDampeningFactor(_newRebaseDampeningFactor);
 		emit ChangeRebaseDampeningFactor(_oldRebaseDampeningFactor, _newRebaseDampeningFactor);
 	}
 
-	function setRebaseTreasuryMintPercent(uint256 _newRebaseTreasuryMintPercent) public override onlyOwner nonReentrant
+	function setRebaseTreasuryMintPercent(uint256 _newRebaseTreasuryMintPercent) external override onlyOwner nonReentrant
 	{
 		uint256 _oldRebaseTreasuryMintPercent = etm.rebaseTreasuryMintPercent;
 		etm.setRebaseTreasuryMintPercent(_newRebaseTreasuryMintPercent);
 		emit ChangeRebaseTreasuryMintPercent(_oldRebaseTreasuryMintPercent, _newRebaseTreasuryMintPercent);
 	}
 
-	function setRebaseTimingParameters(uint256 _newRebaseMinimumInterval, uint256 _newRebaseWindowOffset, uint256 _newRebaseWindowLength) public override onlyOwner nonReentrant
+	function setRebaseTimingParameters(uint256 _newRebaseMinimumInterval, uint256 _newRebaseWindowOffset, uint256 _newRebaseWindowLength) external override onlyOwner nonReentrant
 	{
 		uint256 _oldRebaseMinimumInterval = etm.rebaseMinimumInterval;
 		uint256 _oldRebaseWindowOffset = etm.rebaseWindowOffset;
@@ -180,22 +184,22 @@ contract GElasticToken is ElasticERC20, Ownable, ReentrancyGuard, GElastic
 		emit ChangeRebaseTimingParameters(_oldRebaseMinimumInterval, _oldRebaseWindowOffset, _oldRebaseWindowLength, _newRebaseMinimumInterval, _newRebaseWindowOffset, _newRebaseWindowLength);
 	}
 
-	function addPostRebaseTarget(address _to, bytes memory _data) public override onlyOwner nonReentrant
+	function addPostRebaseTarget(address _to, bytes memory _data) external override onlyOwner nonReentrant
 	{
 		_addPostRebaseTarget(_to, _data);
 	}
 
-	function removePostRebaseTarget(uint256 _index) public override onlyOwner nonReentrant
+	function removePostRebaseTarget(uint256 _index) external override onlyOwner nonReentrant
 	{
 		_removePostRebaseTarget(_index);
 	}
 
-	function addBalancerPostRebaseTarget(address _pool) public onlyOwner nonReentrant
+	function addBalancerPostRebaseTarget(address _pool) external onlyOwner nonReentrant
 	{
 		_addPostRebaseTarget(_pool, abi.encodeWithSignature("gulp(address)", address(this)));
 	}
 
-	function addUniswapV2PostRebaseTarget(address _pair) public onlyOwner nonReentrant
+	function addUniswapV2PostRebaseTarget(address _pair) external onlyOwner nonReentrant
 	{
 		_addPostRebaseTarget(_pair, abi.encodeWithSignature("sync()"));
 	}

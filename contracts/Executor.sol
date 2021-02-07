@@ -1,6 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity ^0.6.0;
 
+/**
+ * @dev This library provides support for the dynamic execution of external
+ * contract calls.
+ */
 library Executor
 {
 	struct Target {
@@ -29,7 +33,7 @@ library Executor
 		}
 	}
 
-	function _externalCall(address _to, bytes memory _data) internal returns (bool _success)
+	function _externalCall(address _to, bytes memory _data) private returns (bool _success)
 	{
 		assembly {
 			_success := call(gas(), _to, 0, add(_data, 0x20), mload(_data), 0, 0)
