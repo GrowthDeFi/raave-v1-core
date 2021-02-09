@@ -59,6 +59,7 @@ library UniswapV2LiquidityPoolAbstraction
 		address _router = $.UniswapV2_ROUTER02;
 		address _token0 = Pair(_pair).token0();
 		address _token1 = Pair(_pair).token1();
+		require(_token == _token0 || _token == _token1, "invalid token");
 		address _otherToken = _token == _token0 ? _token1 : _token0;
 		(uint256 _reserve0, uint256 _reserve1,) = Pair(_pair).getReserves();
 		uint256 _swapAmount = _calcSwapOutputFromInput(_token == _token0 ? _reserve0 : _reserve1, _amount);
@@ -81,6 +82,7 @@ library UniswapV2LiquidityPoolAbstraction
 		address _router = $.UniswapV2_ROUTER02;
 		address _token0 = Pair(_pair).token0();
 		address _token1 = Pair(_pair).token1();
+		require(_token == _token0 || _token == _token1, "invalid token");
 		address _otherToken = _token == _token0 ? _token1 : _token0;
 		Transfers._approveFunds(_pair, _router, _shares);
 		(uint256 _baseAmount, uint256 _swapAmount) = Router02(_router).removeLiquidity(_token, _otherToken, _shares, 1, 1, address(this), uint256(-1));
